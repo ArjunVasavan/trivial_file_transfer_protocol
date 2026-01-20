@@ -8,14 +8,6 @@
 
 Creating a **simple implementation of the Trivial File Transfer Protocol (TFTP)** using **C**.
 
-This project focuses on understanding:
-
-* UDP socket programming
-* Client–server communication
-* Basic TFTP protocol flow
-
-It does **not** aim to be a full RFC-compliant implementation — only the core concepts are implemented for learning purposes.
-
 ## Installation
 
 Clone the repository:
@@ -50,7 +42,6 @@ Run client:
 
 * GCC compiler
 * Linux/Unix system
-* Basic knowledge of networking
 
 ## Author
 
