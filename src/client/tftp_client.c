@@ -1,16 +1,12 @@
-#include "tftp.h"
+#include "../../include/tftp.h"
 #include "tftp_client.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <arpa/inet.h>
 
 
 
 int main() {
     tftp_client_t client;
     memset(&client, 0, sizeof(client));  // Initialize client structure
+    printf("dummy print\n");
 
     // Main loop for command-line interface
     while (1) {
@@ -53,11 +49,18 @@ void disconnect(tftp_client_t *client) {
     // close fd
    
 }
+/*
+
+ FIXME: here some structure data type bug is here commented for fixing later
+
 void send_request(int sockfd, sockaddr_in server_addr, char *filename, int opcode)
 {
 
 }
 
+
 void receive_request(int sockfd, sockaddr_in server_addr, char *filename, int opcode)
 {
 }
+
+*/

@@ -1,6 +1,8 @@
 #ifndef TFTP_CLIENT_H
 #define TFTP_CLIENT_H
 
+#include "../../include/tftp.h"
+
 typedef struct {
     int sockfd;
     struct sockaddr_in server_addr;
