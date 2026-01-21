@@ -1,8 +1,5 @@
 #include "../../include/tftp.h"
-#include <stdio.h>
 #include "tftp_client.h"
-
-
 
 int main() {
     tftp_client_t client;
@@ -11,7 +8,7 @@ int main() {
     // Main loop for command-line interface
     while (1) {
 
-    error_choice:
+    error_case:
         printf("Client Menu\n\n");
         printf("1) Connect\n");
         printf("2) Put\n");
@@ -28,7 +25,15 @@ int main() {
                 char ip_address[69];
                 int port_number;
 
+                if( read_client(ip_address,&port_number) == FAILURE ) {
+
+                    fprintf(stderr,"[ERROR]: Enter valid details\n");
+                    goto error_case;
+
+                }
                     
+                printf("[DEBUG]: readed %s\n",ip_address);
+                printf("[DEBUG]: readed %d\n",port_number);
 
                 break;
             }
@@ -51,13 +56,13 @@ int main() {
             default:{
 
                 fprintf(stderr,"[ERROR] Enter any choice in (1-5) range\n");
-                goto error_choice;
+                goto error_case;
             }
         }
 
-        return 0;
     }
 
+    return 0;
 }
 
 // This function is to initialize socket with given server IP, no packets sent to server in this function

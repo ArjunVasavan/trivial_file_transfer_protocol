@@ -21,6 +21,8 @@ void disconnect(tftp_client_t *client);
 // opcode -> operation code
 void send_request(int sockfd, struct sockaddr_in server_addr, char *filename, int opcode);
 void receive_request(int sockfd, struct sockaddr_in server_addr, char *filename, int opcode);
-int read_client(char* ip_address,int port_number);
+status read_client(char* ip_address,int* port_number);
+status validate_port(int port_number);
+status validate_ip(char* ip_address);
 
 #endif
