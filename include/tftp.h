@@ -13,7 +13,6 @@
 
 #define PORT 6969
 #define BUFFER_SIZE 516  // TFTP data packet size (512 bytes data + 4 bytes header)
-#define TIMEOUT_SEC 5    // Timeout in seconds NOTE: were not using timeout logic in this project
 
 // TFTP OpCodes
 typedef enum {
@@ -23,6 +22,12 @@ typedef enum {
     ACK = 4,  // Acknowledgment
     ERROR = 5 // Error Packet
 } tftp_opcode;
+
+typedef enum {
+    SUCCESS = 0,
+    FAILURE = 1
+} status;
+
 
 // TFTP Packet Structure
 typedef struct {
