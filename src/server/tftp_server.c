@@ -13,8 +13,11 @@ int main() {
     // Create UDP socket
 
 
+
+
+
     // Set socket timeout option
-    //TODO Use setsockopt() to set timeout option
+    // TODO: Use setsockopt() to set timeout option
 
     
     // Set up server address
