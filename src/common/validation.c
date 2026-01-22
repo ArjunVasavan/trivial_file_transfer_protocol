@@ -48,7 +48,6 @@ status read_client(char* ip_address,int* port_number) {
 
     printf("Enter IP address: ");
     scanf("%s",ip_address);
-    printf("Read %s\n",ip_address);
 
     if ( validate_ip(ip_address) == FAILURE ) {
         return FAILURE;
@@ -60,6 +59,14 @@ status read_client(char* ip_address,int* port_number) {
     if (validate_port(*port_number) == FAILURE ) {
         return FAILURE;
     }
+
+    return SUCCESS;
+}
+
+status validate_filename(char* filename) {
+
+    
+    
 
     return SUCCESS;
 }

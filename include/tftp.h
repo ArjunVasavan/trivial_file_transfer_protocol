@@ -60,5 +60,6 @@ typedef struct {
 void send_file(int sockfd, struct sockaddr_in client_addr, socklen_t client_len, char *filename);
 void receive_file(int sockfd, struct sockaddr_in client_addr, socklen_t client_len, char *filename);
 
+status validate_filename(char* filename);
 
 #endif // TFTP_H

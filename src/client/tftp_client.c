@@ -1,5 +1,12 @@
 #include "../../include/tftp.h"
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/socket.h>
 #include "tftp_client.h"
+
+status connect_should_be_first = FAILURE;
 
 int main() {
     tftp_client_t client;
@@ -32,16 +39,40 @@ int main() {
 
                 }
                     
-                printf("[DEBUG]: readed %s\n",ip_address);
-                printf("[DEBUG]: readed %d\n",port_number);
+                connect_to_server(&client,ip_address,port_number);
+
+                connect_should_be_first = SUCCESS;
 
                 break;
             }
             case 2:{
 
+                if ( connect_should_be_first == FAILURE ) {
+
+                    fprintf(stderr,"[ERROR]: Before doing operations first connect with server\n");
+                    goto error_case;
+
+                }
+
+                char filename[69];
+
+                put_file(&client,filename);
+
                 break;
             }
             case 3:{
+
+                if ( connect_should_be_first == FAILURE ) {
+
+                    fprintf(stderr,"[ERROR]: Before doing operations first connect with server\n");
+                    goto error_case;
+
+                }
+
+
+                char filename[69];
+
+                get_file(&client,filename);
 
                 break;
             }
@@ -67,28 +98,57 @@ int main() {
 
 // This function is to initialize socket with given server IP, no packets sent to server in this function
 void connect_to_server(tftp_client_t *client, char *ip, int port) {
-    // Create UDP socket
 
-    // TODO: read the server address and port number after that validate 
-    // bind
+    client->sockfd = socket(AF_INET,SOCK_DGRAM,0);
 
+    if ( client->sockfd < 0 ) {
+        perror("socket failed\n");
+        return;
+    }
+
+    client->server_addr.sin_family = AF_INET;
+    client->server_addr.sin_port = htons(port);
+    client->server_addr.sin_addr.s_addr = inet_addr(ip);
+    strcpy(client->server_ip,ip);
+
+    char dummy_data[25] = "DUMMY_SIGNAL";
+    sendto(client->sockfd,dummy_data,sizeof(dummy_data),0,(struct sockaddr*)&client->server_addr,sizeof(client->server_addr));
 
 }
 
 void put_file(tftp_client_t *client, char *filename) {
-    /*
-     NOTE: put_file
-     read file name and validate
-     if ( exist ) => send
-
-    */
 
     // Send WRQ request and send file
+    
+    printf("Enter the name of file to send: ");
+    scanf("%s",filename);
+
+    tftp_packet put_packet;
+
+    put_packet.opcode = WRQ;
+
+    strcpy(put_packet.body.request.filename,filename);
+
+    sendto(client->sockfd,&put_packet,sizeof(put_packet),0,(struct sockaddr*)&client->server_addr,sizeof(client->server_addr));
+
+
 
 }
 
 void get_file(tftp_client_t *client, char *filename) {
     // Send RRQ and recive file 
+
+    printf("Enter the name of file to recieve: ");
+    scanf("%s",filename);
+
+    tftp_packet put_packet;
+
+    put_packet.opcode = RRQ;
+
+    strcpy(put_packet.body.request.filename,filename);
+
+    sendto(client->sockfd,&put_packet,sizeof(put_packet),0,(struct sockaddr*)&client->server_addr,sizeof(client->server_addr));
+
 
 }
 
