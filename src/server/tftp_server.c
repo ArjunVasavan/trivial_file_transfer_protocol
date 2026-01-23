@@ -1,7 +1,4 @@
 #include "../../include/tftp.h"
-#include <stdio.h>
-#include <string.h>
-#include <sys/socket.h>
 
 
 void handle_client(int sockfd, struct sockaddr_in client_addr, socklen_t client_len, tftp_packet *packet);
@@ -42,16 +39,12 @@ int main() {
 
     printf("TFTP Server listening on port %d...\n", PORT);
 
-    char dummy_test[25];
-    recvfrom(sockfd,dummy_test,sizeof(dummy_test),0,(struct sockaddr*)&client_addr,&client_len);
 
-    if(strcmp(dummy_test,"DUMMY_SIGNAL") == 0 ) {
-        printf("connected to client recieved dummy signal\n");
-    }
 
-    // Main loop to handle incoming requests
     while (1) {
+
         int n = recvfrom(sockfd, &packet, BUFFER_SIZE, 0, (struct sockaddr *)&client_addr, &client_len);
+
         if (n < 0) {
             perror("Receive failed or timeout occurred");
             continue;
@@ -69,16 +62,20 @@ void handle_client(int sockfd, struct sockaddr_in client_addr, socklen_t client_
     // Extract the TFTP operation (read or write) from the received packet
     // and call send_file or receive_file accordingly
     
-    tftp_opcode tftp_operation = packet->opcode;
+    tftp_opcode tftp_operation = ntohs(packet->opcode);
 
-    printf("[CHECK]: recieved %d from %s\n",packet->opcode,packet->body.request.filename);
+    printf("[CHECK]: recieved %d \n",packet->opcode);
 
-    if ( tftp_operation == WRQ ) {
+    if ( tftp_operation == WRQ || tftp_operation == RRQ ) {
 
-    } else if ( tftp_operation == RRQ ) {
+        receive_file(sockfd,client_addr,client_len,packet->body.request.filename);
+
 
     } else if ( tftp_operation == DATA ) {
     
+        printf("Now on DATA\n");
+        printf("Data now containing is %s\n",packet->body.data_packet.data);
+
     } else if ( tftp_operation == ACK ) {
 
     } else if ( tftp_operation == ERROR ) {

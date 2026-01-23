@@ -1,9 +1,5 @@
 #include "../../include/tftp.h"
-#include <arpa/inet.h>
-#include <netinet/in.h>
 #include <stdio.h>
-#include <string.h>
-#include <sys/socket.h>
 #include "tftp_client.h"
 
 status connect_should_be_first = FAILURE;
@@ -69,7 +65,6 @@ int main() {
 
                 }
 
-
                 char filename[69];
 
                 get_file(&client,filename);
@@ -111,9 +106,6 @@ void connect_to_server(tftp_client_t *client, char *ip, int port) {
     client->server_addr.sin_addr.s_addr = inet_addr(ip);
     strcpy(client->server_ip,ip);
 
-    char dummy_data[25] = "DUMMY_SIGNAL";
-    sendto(client->sockfd,dummy_data,sizeof(dummy_data),0,(struct sockaddr*)&client->server_addr,sizeof(client->server_addr));
-
 }
 
 void put_file(tftp_client_t *client, char *filename) {
@@ -123,15 +115,13 @@ void put_file(tftp_client_t *client, char *filename) {
     printf("Enter the name of file to send: ");
     scanf("%s",filename);
 
-    tftp_packet put_packet;
+    send_request(client->sockfd,client->server_addr,filename,WRQ);
 
-    put_packet.opcode = WRQ;
+    char location_of_file[69];
 
-    strcpy(put_packet.body.request.filename,filename);
+    sprintf(location_of_file,"src/client/%s",filename);
 
-    sendto(client->sockfd,&put_packet,sizeof(put_packet),0,(struct sockaddr*)&client->server_addr,sizeof(client->server_addr));
-
-
+    send_file(client->sockfd,client->server_addr,client->server_len,location_of_file);
 
 }
 
@@ -141,14 +131,6 @@ void get_file(tftp_client_t *client, char *filename) {
     printf("Enter the name of file to recieve: ");
     scanf("%s",filename);
 
-    tftp_packet put_packet;
-
-    put_packet.opcode = RRQ;
-
-    strcpy(put_packet.body.request.filename,filename);
-
-    sendto(client->sockfd,&put_packet,sizeof(put_packet),0,(struct sockaddr*)&client->server_addr,sizeof(client->server_addr));
-
 
 }
 
@@ -156,18 +138,19 @@ void disconnect(tftp_client_t *client) {
     // close fd
 
 }
-/*
 
- FIXME: here some structure data type bug is here commented for fixing later
 
-void send_request(int sockfd, sockaddr_in server_addr, char *filename, int opcode)
-{
+void send_request(int sockfd,struct sockaddr_in server_addr, char *filename, int opcode) {
+
+    tftp_packet send_packet;
+
+    send_packet.opcode = htons(opcode);
+
+    strcpy(send_packet.body.request.filename,filename);
+
+    // TODO: mode is needed here
+    
+    sendto(sockfd,&send_packet,sizeof(send_packet),0,(struct sockaddr*)&server_addr,sizeof(server_addr));
+
 
 }
-
-
-void receive_request(int sockfd, sockaddr_in server_addr, char *filename, int opcode)
-{
-}
-
-*/

@@ -9,7 +9,9 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <stdbool.h>
+#include <fcntl.h>
+#include <errno.h>
 
 #define PORT 6969
 #define BUFFER_SIZE 516  // TFTP data packet size (512 bytes data + 4 bytes header)
@@ -39,7 +41,7 @@ typedef struct {
     union {
         struct {
             char filename[256];
-            int mode[8];  // Typically "octet"
+            char mode[8];  // Typically "octet"
         } request;  // RRQ and WRQ
         struct {
             uint16_t block_number; // packet number is block_number 
@@ -57,8 +59,8 @@ typedef struct {
     } body;
 } tftp_packet;
 
-void send_file(int sockfd, struct sockaddr_in client_addr, socklen_t client_len, char *filename);
-void receive_file(int sockfd, struct sockaddr_in client_addr, socklen_t client_len, char *filename);
+void send_file(int sockfd, struct sockaddr_in address, socklen_t client_len, char *filename);
+void receive_file(int sockfd, struct sockaddr_in address, socklen_t client_len, char *filename);
 
 status validate_filename(char* filename);
 
