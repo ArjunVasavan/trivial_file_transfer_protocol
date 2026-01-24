@@ -57,30 +57,25 @@ int main() {
     return 0;
 }
 
-void handle_client(int sockfd, struct sockaddr_in client_addr, socklen_t client_len, tftp_packet *packet) 
-{
+void handle_client(int sockfd, struct sockaddr_in client_addr, socklen_t client_len, tftp_packet *packet) {
     // Extract the TFTP operation (read or write) from the received packet
     // and call send_file or receive_file accordingly
-    
+
     tftp_opcode tftp_operation = ntohs(packet->opcode);
 
     printf("[CHECK]: recieved %d \n",packet->opcode);
 
-    if ( tftp_operation == WRQ || tftp_operation == RRQ ) {
+    if ( tftp_operation == WRQ ) {
 
         receive_file(sockfd,client_addr,client_len,packet->body.request.filename);
 
+    }  else if (tftp_operation == RRQ) {
 
-    } else if ( tftp_operation == DATA ) {
-    
-        printf("Now on DATA\n");
-        printf("Data now containing is %s\n",packet->body.data_packet.data);
 
-    } else if ( tftp_operation == ACK ) {
-
-    } else if ( tftp_operation == ERROR ) {
 
     } else {
+
+
 
     }
 }

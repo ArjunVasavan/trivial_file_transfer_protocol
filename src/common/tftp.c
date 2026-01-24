@@ -1,6 +1,8 @@
 #include "../../include/tftp.h"
+#include <fcntl.h>
 #include <netinet/in.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <sys/socket.h>
 #include <unistd.h>
 
@@ -80,6 +82,7 @@ void send_file(int sockfd, struct sockaddr_in address, socklen_t len, char *file
             // FIXME: modify goto section logic
             // fix: wrong op code
             // recvfrom failure
+        
             goto once_more_send;
 
         }
@@ -101,6 +104,71 @@ void send_file(int sockfd, struct sockaddr_in address, socklen_t len, char *file
 
 void receive_file(int sockfd, struct sockaddr_in address, socklen_t len, char *filename) 
 {
-    // Implement file receiving logic here
-}
+    // Implement file receiving logic here 
+    
+    int fd = open(filename,O_WRONLY|O_TRUNC|O_CREAT,0666); 
 
+    unsigned long int expected_block = 1;
+
+    tftp_packet data_packet;
+  
+    long int recieved_bytes;
+
+    struct sockaddr_in client_addr;
+
+    socklen_t client_len = sizeof(client_addr);
+
+    tftp_packet ack_packet;
+
+    while ( true ) {
+ 
+    once_more_read:
+
+        recieved_bytes = recvfrom(sockfd,&data_packet,BUFFER_SIZE,
+                                                    0,(struct sockaddr*)&client_addr,&client_len);
+
+        printf("[BYTES RECIEVED]: %lu\n",recieved_bytes);
+
+        uint16_t opcode = ntohs(data_packet.opcode);
+
+        uint16_t block_number = ntohs(data_packet.body.data_packet.block_number);
+
+        if ( opcode == DATA ) {
+
+            if ( block_number != expected_block ) {
+                    
+                ack_packet.opcode = htons(ACK);
+
+                ack_packet.body.ack_packet.block_number = htons(expected_block - 1);
+
+                // 4 byets => opcode + block_number
+
+                sendto(sockfd,&ack_packet,4,0,(struct sockaddr*)&client_addr,client_len);
+
+                goto once_more_read;
+
+                // FIXME: modify goto later 
+
+            }
+
+            int data_length = recieved_bytes - 4 ; // 4 => opcode + block_number
+
+            write(fd,data_packet.body.data_packet.data,data_length);
+
+            ack_packet.opcode = htons(ACK);
+
+            ack_packet.body.ack_packet.block_number = htons(expected_block);
+
+            sendto(sockfd,&ack_packet,4,0,(struct sockaddr*)&client_addr,client_len);
+
+            expected_block+=1;
+
+            if ( data_length < 512 ) break;
+
+        }
+
+    }
+
+
+    close(fd);
+}
