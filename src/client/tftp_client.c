@@ -1,5 +1,4 @@
 #include "../../include/tftp.h"
-#include <stdio.h>
 #include "tftp_client.h"
 
 status connect_should_be_first = FAILURE;
