@@ -94,6 +94,8 @@ void connect_to_server(tftp_client_t *client, char *ip, int port) {
 
     client->sockfd = socket(AF_INET,SOCK_DGRAM,0);
 
+    client->server_len = sizeof(client->server_addr);
+
     if ( client->sockfd < 0 ) {
         perror("socket failed\n");
         return;

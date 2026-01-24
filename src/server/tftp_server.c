@@ -63,8 +63,6 @@ void handle_client(int sockfd, struct sockaddr_in client_addr, socklen_t client_
 
     tftp_opcode tftp_operation = ntohs(packet->opcode);
 
-    printf("[CHECK]: recieved %d \n",packet->opcode);
-
     if ( tftp_operation == WRQ ) {
 
         receive_file(sockfd,client_addr,client_len,packet->body.request.filename);

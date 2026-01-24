@@ -89,6 +89,17 @@ void send_file(int sockfd, struct sockaddr_in address, socklen_t len, char *file
 
         // ELSE : ACK is valid
 
+        if (read_count == 0) {
+            // send final DATA with 0 bytes
+            packet.body.data_packet.block_number = htons(block_number);
+            unsigned long packet_length = 2 + 2;
+
+            sendto(sockfd, &packet, packet_length, 0,
+                   (struct sockaddr*)&address, len);
+
+            // wait for ACK of this block (same logic you already use)
+        }
+
 
         if ( read_count < 512 ) {
 
@@ -105,13 +116,19 @@ void send_file(int sockfd, struct sockaddr_in address, socklen_t len, char *file
 void receive_file(int sockfd, struct sockaddr_in address, socklen_t len, char *filename) 
 {
     // Implement file receiving logic here 
-    
-    int fd = open(filename,O_WRONLY|O_TRUNC|O_CREAT,0666); 
+
+
+    char fullpath[265];
+
+    sprintf(fullpath,"src/server/%s",filename);
+
+
+    int fd = open(fullpath,O_WRONLY|O_TRUNC|O_CREAT,0666); 
 
     unsigned long int expected_block = 1;
 
     tftp_packet data_packet;
-  
+
     long int recieved_bytes;
 
     struct sockaddr_in client_addr;
@@ -121,11 +138,11 @@ void receive_file(int sockfd, struct sockaddr_in address, socklen_t len, char *f
     tftp_packet ack_packet;
 
     while ( true ) {
- 
+
     once_more_read:
 
         recieved_bytes = recvfrom(sockfd,&data_packet,BUFFER_SIZE,
-                                                    0,(struct sockaddr*)&client_addr,&client_len);
+                                  0,(struct sockaddr*)&client_addr,&client_len);
 
         printf("[BYTES RECIEVED]: %lu\n",recieved_bytes);
 
@@ -136,7 +153,7 @@ void receive_file(int sockfd, struct sockaddr_in address, socklen_t len, char *f
         if ( opcode == DATA ) {
 
             if ( block_number != expected_block ) {
-                    
+
                 ack_packet.opcode = htons(ACK);
 
                 ack_packet.body.ack_packet.block_number = htons(expected_block - 1);
