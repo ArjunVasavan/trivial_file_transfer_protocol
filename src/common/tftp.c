@@ -1,5 +1,3 @@
-/* Common file for server & client */
-
 #include "../../include/tftp.h"
 
 void send_file(int sockfd, struct sockaddr_in address, socklen_t len, char *filename) 
@@ -56,7 +54,9 @@ void send_file(int sockfd, struct sockaddr_in address, socklen_t len, char *file
 
         int ack_pack_length = sizeof(ack_packet.opcode) + sizeof(ack_packet.body.ack_packet);
 
-        // recvfrom(sockfd,&ack_packet,, int flags, struct sockaddr *restrict addr, socklen_t *restrict addr_len)
+        struct sockaddr_in client_addr;
+
+        recvfrom(sockfd,&ack_packet,ack_pack_length,0,);
 
 
     }

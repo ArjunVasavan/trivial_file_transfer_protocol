@@ -8,7 +8,6 @@ int main() {
     tftp_client_t client;
     memset(&client, 0, sizeof(client));  // Initialize client structure
 
-    // Main loop for command-line interface
     while (1) {
 
     error_case:
