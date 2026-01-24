@@ -77,6 +77,9 @@ void send_file(int sockfd, struct sockaddr_in address, socklen_t len, char *file
 
         } else if ( ack_block_number != block_number ) {
 
+            // FIXME: modify goto section logic
+            // fix: wrong op code
+            // recvfrom failure
             goto once_more_send;
 
         }
