@@ -27,7 +27,7 @@ void send_file(int sockfd, struct sockaddr_in address, socklen_t len, char *file
     while ( (read_count = read(fd,packet.body.data_packet.data,512)) > 0 ) {
 
 
-        printf("readed ->%s<-\n",packet.body.data_packet.data);
+        printf("readed >%s<-\n",packet.body.data_packet.data);
 
         packet.body.data_packet.block_number = htons(block_number);
 

@@ -56,10 +56,7 @@ typedef enum {
 
 typedef struct {
     uint16_t opcode; // Operation code (RRQ/WRQ/DATA/ACK/ERROR)
-    /*
-     NOTE: all the sending packets are happened here
-     based on opcode enum we does the Operation
-    */
+    
     union {
         struct {
             char filename[256];

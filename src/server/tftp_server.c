@@ -1,6 +1,4 @@
 #include "../../include/tftp.h"
-#include <netinet/in.h>
-#include <sys/socket.h>
 
 
 void handle_client(int sockfd, struct sockaddr_in client_addr, socklen_t client_len, tftp_packet *packet);
