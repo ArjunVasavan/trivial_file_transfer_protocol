@@ -3,6 +3,7 @@
 #ifndef TFTP_H
 #define TFTP_H
 
+// Libraries
 #include <stdint.h>
 #include <arpa/inet.h>
 #include <stdio.h>
@@ -13,10 +14,23 @@
 #include <fcntl.h>
 #include <errno.h>
 
-#define PORT 6969
-#define BUFFER_SIZE 516  // TFTP data packet size (512 bytes data + 4 bytes header)
 
-// TFTP OpCodes
+#define PORT 6969
+#define BUFFER_SIZE 516  // Maximum possible packet size
+//[opcode(2)][block_number(2)][Data(0-512)]
+
+/* NOTE:  TFTP OpCodes
+ * RRQ: requesting server to send the data " Client <- Server "
+ * WRQ: sending data from client to sever " Server -> Client "
+ * DATA: to indicate the packet sended contains data
+ * ACK: to indicate if the data is correctly recieved or not 
+ * ERROR: if something went wrong and to stop the transfer 
+ *       -> file not found
+ *       -> permission denied 
+ *       -> illegal opcode
+ *       -> disk full
+ */
+
 typedef enum {
     RRQ = 1,  // Read Request
     WRQ = 2,  // Write Request
@@ -31,7 +45,15 @@ typedef enum {
 } status;
 
 
-// TFTP Packet Structure
+/* NOTE: TFTP Packet Structure
+ * opcode: first 2 bytes of every tftp packet, tells what kind of packet it is 
+ * union: only one of these exist at a time 
+ *        request: only sent once at start
+ *        data_packet: transfer file data 
+ *        ack_packet: ACK block_number must match the data block number
+ *        error_packet: once ERROR is sent -> connection ends
+ */
+
 typedef struct {
     uint16_t opcode; // Operation code (RRQ/WRQ/DATA/ACK/ERROR)
     /*
@@ -50,7 +72,7 @@ typedef struct {
         } data_packet; // DATA
         struct {
             uint16_t block_number;
-            int data_size;
+            int data_size; // use this for debugging only not used for sending data
         } ack_packet; // ACK
         struct {
             uint16_t error_code;
@@ -61,7 +83,6 @@ typedef struct {
 
 void send_file(int sockfd, struct sockaddr_in address, socklen_t client_len, char *filename);
 void receive_file(int sockfd, struct sockaddr_in address, socklen_t client_len, char *filename);
-
 status validate_filename(char* filename);
 
 #endif // TFTP_H

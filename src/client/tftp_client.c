@@ -1,16 +1,22 @@
 #include "../../include/tftp.h"
+#include <netinet/in.h>
+#include <stdio.h>
+#include <sys/socket.h>
 #include "tftp_client.h"
 
 status connect_should_be_first = FAILURE;
+// This is used to check connection should happen first
 
 int main() {
+
     tftp_client_t client;
-    memset(&client, 0, sizeof(client));  // Initialize client structure
+    memset(&client, 0, sizeof(client)); 
 
-    while (1) {
+    while (1) { // an infinite loop till user presses exit
 
-    error_case:
-        printf("Client Menu\n\n");
+    error_case: // this is an goto when user enters invalid options
+
+        printf("Client Menu\n");
         printf("1) Connect\n");
         printf("2) Put\n");
         printf("3) Get\n");
@@ -23,7 +29,7 @@ int main() {
 
             case 1:{
 
-                char ip_address[69];
+                char ip_address[256];
                 int port_number;
 
                 if( read_client(ip_address,&port_number) == FAILURE ) {
@@ -32,7 +38,7 @@ int main() {
                     goto error_case;
 
                 }
-                    
+
                 connect_to_server(&client,ip_address,port_number);
 
                 connect_should_be_first = SUCCESS;
@@ -48,7 +54,7 @@ int main() {
 
                 }
 
-                char filename[69];
+                char filename[256];
 
                 put_file(&client,filename);
 
@@ -64,7 +70,6 @@ int main() {
                 }
 
                 char filename[69];
-
                 get_file(&client,filename);
 
                 break;
@@ -111,16 +116,33 @@ void connect_to_server(tftp_client_t *client, char *ip, int port) {
 void put_file(tftp_client_t *client, char *filename) {
 
     // Send WRQ request and send file
-    
+
     printf("Enter the name of file to send: ");
     scanf("%s",filename);
 
     send_request(client->sockfd,client->server_addr,filename,WRQ);
 
+
+    tftp_packet ack_packet;
+
+    struct sockaddr_in from;
+
+    socklen_t from_len = sizeof(from);
+
+    recvfrom(client->sockfd,&ack_packet,4,0,(struct sockaddr*)&from,&from_len);
+
+    if ( ntohs(ack_packet.opcode) != ACK || ntohs(ack_packet.body.ack_packet.block_number) != 0 ) {
+
+        printf("WRQ rejected\n");
+        return;
+
+    }
+
     char location_of_file[69];
 
     sprintf(location_of_file,"src/client/%s",filename);
 
+    printf("going to send_file\n");
     send_file(client->sockfd,client->server_addr,client->server_len,location_of_file);
 
 }
@@ -149,8 +171,11 @@ void send_request(int sockfd,struct sockaddr_in server_addr, char *filename, int
     strcpy(send_packet.body.request.filename,filename);
 
     // TODO: mode is needed here
-    
-    sendto(sockfd,&send_packet,sizeof(send_packet),0,(struct sockaddr*)&server_addr,sizeof(server_addr));
+
+    int size_of_send_packet = 2 + strlen(filename) + 1 ;
+    // size_of_send_packet = opcode (2 bytes) + filename + '\0'
+
+    sendto(sockfd,&send_packet,size_of_send_packet,0,(struct sockaddr*)&server_addr,sizeof(server_addr));
 
 
 }

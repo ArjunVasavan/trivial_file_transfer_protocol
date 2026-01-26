@@ -46,6 +46,8 @@ status validate_port(int port_number) {
 
 status read_client(char* ip_address,int* port_number) {
 
+    // Reading IP address an Port number
+
     printf("Enter IP address: ");
     scanf("%s",ip_address);
 
