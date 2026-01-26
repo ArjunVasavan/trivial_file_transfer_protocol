@@ -1,6 +1,5 @@
 #include "../../include/tftp.h"
 
-
 void handle_client(int sockfd, struct sockaddr_in client_addr, socklen_t client_len, tftp_packet *packet);
 
 int main() {
@@ -20,8 +19,7 @@ int main() {
     server_addr.sin_port = htons(PORT);
     server_addr.sin_addr.s_addr = INADDR_ANY;
 
-    /*
-     * NOTE: INADDR_ANY
+    /* NOTE: INADDR_ANY
      * INADDR_ANY: it allows server to listen to any interface like local or LAN
      * loop back address 127.0.0.1 also be used here but it will limit the ---
      * system to local interfaces only like only on same machine
@@ -65,15 +63,26 @@ void handle_client(int sockfd, struct sockaddr_in client_addr, socklen_t client_
 
     if ( tftp_operation == WRQ ) {
 
+        //Creating new socket for client 
+        
+        int tid_sock = socket(AF_INET,SOCK_DGRAM,0);
+
+        if ( tid_sock < 0 ) {
+            perror("TID sock failed");
+            return;
+        }
+
+        //sending ack packet 
+
         tftp_packet ack_packet;
         ack_packet.opcode = htons(ACK);
         ack_packet.body.ack_packet.block_number = htons(0);
 
-        sendto(sockfd,&ack_packet,4,0,(struct sockaddr*)&client_addr,client_len);
+        sendto(tid_sock,&ack_packet,4,0,(struct sockaddr*)&client_addr,client_len);
+        receive_file(tid_sock,client_addr,client_len,packet->body.request.filename);
 
-        receive_file(sockfd,client_addr,client_len,packet->body.request.filename);
 
-
+        close(tid_sock);
 
     }  else if (tftp_operation == RRQ) {
 
