@@ -1,4 +1,7 @@
 #include "../../include/tftp.h" // contain common defination  
+#include <netinet/in.h>
+#include <stdio.h>
+#include <sys/socket.h>
 #include "tftp_client.h" // client only defination and function declar
 
 status connect_should_be_first = FAILURE;
@@ -119,8 +122,22 @@ void get_file(tftp_client_t *client, char *filename) {
 
     printf("Enter the name of file to recieve: ");
     scanf("%s",filename);
+    printf("[get_file]: sending request\n");
+    send_request(client->sockfd,client->server_addr,filename,RRQ);
+    tftp_packet ack_packet;
+    recvfrom(client->sockfd,&ack_packet,4,0,NULL,NULL);
+    printf("[get_file]: recieved ACK\n");
 
 
+    if ( ntohs(ack_packet.opcode) != ACK || ntohs(ack_packet.body.ack_packet.block_number) != 0 ) {
+        printf("RRQ rejected\n");
+        return;
+    }
+
+    char fullpath[300];
+    snprintf(fullpath,sizeof(fullpath),"src/client/%s",filename);
+    receive_file(client->sockfd,client->server_addr,client->server_len,fullpath);
+    
 }
 
 void disconnect(tftp_client_t *client) {

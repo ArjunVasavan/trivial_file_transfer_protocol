@@ -1,10 +1,13 @@
 #include "../../include/tftp.h"
+#include <stdio.h>
 
 void send_file(int sockfd, struct sockaddr_in address, socklen_t len, char *filename) {
 
     // Implement file sending logic here
     char buf[100];
+    printf("[send_file]:opening %s\n",filename);
     int fd = open(filename,O_RDONLY);
+    printf("[send_file]:opening successfull\n");
 
     if ( fd < 0 ) {
         perror("open failed");
@@ -19,6 +22,7 @@ void send_file(int sockfd, struct sockaddr_in address, socklen_t len, char *file
 
     while ( (read_count = read(fd,packet.body.data_packet.data,512)) > 0 ) {
 
+        printf("[send_file]: read ""%s""  \n",packet.body.data_packet.data);
         packet.body.data_packet.block_number = htons(block_number);
         packet.body.data_packet.data_size = read_count;
         unsigned long int packet_length = 2 + 2 + read_count;
@@ -26,7 +30,9 @@ void send_file(int sockfd, struct sockaddr_in address, socklen_t len, char *file
 
     once_more_send:
 
+        printf("[send_file]: sending packet...\n");
         sendto(sockfd,&packet,packet_length,0,(struct sockaddr*)&address,len);
+        printf("[send_file]: sended packet!\n");
 
         /*
          * NOTE: How sendto sends data from start of address to packet_length
@@ -80,11 +86,11 @@ void send_file(int sockfd, struct sockaddr_in address, socklen_t len, char *file
             break;
         }
 
-        printf("Sended\n");
+        printf("[send_file]: Comeplete data sended\n");
 
     }
 
-    printf("exited\n");
+    printf("[send_file]: exited\n");
 
     // NOTE: EDGE CASE => if last data size is mutliple of 512
     // the sender must send one extra data packet with 0 bytes
@@ -136,14 +142,11 @@ void send_file(int sockfd, struct sockaddr_in address, socklen_t len, char *file
     close(fd);
 }
 
-void receive_file(int sockfd, struct sockaddr_in address, socklen_t len, char *filename) 
-{
-    // Implement file receiving logic here 
+void receive_file(int sockfd, struct sockaddr_in address, socklen_t len, char *filename) {
 
-
-    char fullpath[265];
-    sprintf(fullpath,"src/server/%s",filename);
-    int fd = open(fullpath,O_WRONLY|O_TRUNC|O_CREAT,0666); 
+    printf("[receive_file]: opening %s\n",filename);
+    int fd = open(filename,O_WRONLY|O_TRUNC|O_CREAT,0666); 
+    printf("[receive_file]: opening successfull\n");
     unsigned long int expected_block = 1;
     tftp_packet data_packet;
     long int recieved_bytes;

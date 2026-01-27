@@ -1,4 +1,7 @@
 #include "../../include/tftp.h"
+#include <netinet/in.h>
+#include <stdio.h>
+#include <sys/socket.h>
 
 
 void handle_client(int sockfd, struct sockaddr_in client_addr, socklen_t client_len, tftp_packet *packet);
@@ -8,7 +11,6 @@ int main() {
     struct sockaddr_in server_addr, client_addr;
     socklen_t client_len = sizeof(client_addr);
     tftp_packet packet;
-
     sockfd = socket(AF_INET,SOCK_DGRAM,0);
 
     if ( sockfd < 0 ) {
@@ -29,24 +31,23 @@ int main() {
 
   
     if(bind(sockfd,(struct sockaddr*)&server_addr,sizeof(server_addr)) < 0 ) {
-
         perror("bind failed");
         close(sockfd);
         exit(EXIT_FAILURE);
-
     }
-
 
     printf("TFTP Server listening on port %d...\n", PORT);
 
+    while (true) {
 
-
-    while (1) {
+        printf("[main]: trying to recieved ack\n");
 
         int n = recvfrom(sockfd, &packet, BUFFER_SIZE, 0, (struct sockaddr *)&client_addr, &client_len);
 
+        printf("[main]: recieved ack\n");
+
         if (n < 0) {
-            perror("Receive failed or timeout occurred");
+            perror("Receive failed");
             continue;
         }
 
@@ -70,10 +71,23 @@ void handle_client(int sockfd, struct sockaddr_in client_addr, socklen_t client_
         ack_packet.body.ack_packet.block_number = htons(0);
 
         sendto(sockfd,&ack_packet,4,0,(struct sockaddr*)&client_addr,client_len);
-        receive_file(sockfd,client_addr,client_len,packet->body.request.filename);
+        char fullpath[300];
+        snprintf(fullpath,sizeof(fullpath),"src/server/%s",packet->body.request.filename);
+        receive_file(sockfd,client_addr,client_len,fullpath);
+
 
     }  else if (tftp_operation == RRQ) {
 
+        tftp_packet ack_packet;
+        ack_packet.opcode = htons(ACK);
+        ack_packet.body.ack_packet.block_number = htons(0);
+
+
+
+        char fullpath[300];
+        snprintf(fullpath,sizeof(fullpath),"src/server/%s",packet->body.request.filename);
+        sendto(sockfd,&ack_packet,4,0,(struct sockaddr*)&client_addr,client_len);
+        send_file(sockfd,client_addr,client_len,fullpath);
 
 
     } else {
