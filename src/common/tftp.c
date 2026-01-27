@@ -27,7 +27,7 @@ void send_file(int sockfd, struct sockaddr_in address, socklen_t len, char *file
     while ( (read_count = read(fd,packet.body.data_packet.data,512)) > 0 ) {
 
 
-        printf("readed >%.*s<-\n",read_count,packet.body.data_packet.data);
+        printf("readed >%s<-\n",packet.body.data_packet.data);
 
         packet.body.data_packet.block_number = htons(block_number);
 
@@ -41,7 +41,6 @@ void send_file(int sockfd, struct sockaddr_in address, socklen_t len, char *file
     once_more_send:
 
         sendto(sockfd,&packet,packet_length,0,(struct sockaddr*)&address,len);
-
 
         /*
          * NOTE: How sendto sends data from start of address to packet_length
@@ -80,7 +79,7 @@ void send_file(int sockfd, struct sockaddr_in address, socklen_t len, char *file
             // FIXME: modify goto section logic
             // fix: wrong op code
             // recvfrom failure
-
+        
             goto once_more_send;
 
         }
@@ -90,25 +89,19 @@ void send_file(int sockfd, struct sockaddr_in address, socklen_t len, char *file
             last_was_full  = 1;
 
         } else {
-
+        
             last_was_full = 0;
 
         }
 
         block_number+=1;
 
-        printf("Sended\n");
-        fflush(stdout);
-
-
-
         if ( read_count < 512 ) {
 
             break;
         }
 
-
-        memset(packet.body.data_packet.data, 0, 512);
+        printf("Sended\n");
 
     }
 
@@ -160,12 +153,12 @@ void send_file(int sockfd, struct sockaddr_in address, socklen_t len, char *file
     }
 
     printf("Completed Sending\n");
-    fflush(stdout);
 
     close(fd);
 }
 
-void receive_file(int sockfd, struct sockaddr_in address, socklen_t len, char *filename) {
+void receive_file(int sockfd, struct sockaddr_in address, socklen_t len, char *filename) 
+{
     // Implement file receiving logic here 
 
 
