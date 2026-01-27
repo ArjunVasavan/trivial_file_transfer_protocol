@@ -23,6 +23,7 @@ int main() {
         printf("4) Mode\n");
         printf("5) Exit\n");
         int choice;
+        printf("Enter an Choice: ");
         scanf("%d",&choice);
 
         switch (choice) {
