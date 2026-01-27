@@ -1,4 +1,6 @@
 #include "../../include/tftp.h" // contain common defination  
+#include <stdio.h>
+#include <string.h>
 #include "tftp_client.h" // client only defination and function declar
 
 status connect_should_be_first = FAILURE;
@@ -9,7 +11,7 @@ int main() {
     tftp_client_t client;
     memset(&client, 0, sizeof(client)); 
 
-    while (1) { // an infinite loop till user presses exit
+    while ( true ) { // an infinite loop till user presses exit
 
     error_case: // this is an goto when user enters invalid options
 
@@ -129,7 +131,6 @@ void put_file(tftp_client_t *client, char *filename) {
         return;
     }
 
-    // CRITICAL FIX: Update server address to the NEW port (TID) from the ACK
     printf("Server responded from port %d (TID)\n", ntohs(from.sin_port));
     client->server_addr = from;  // Use the port server sent ACK from
     client->server_len = from_len;
@@ -161,27 +162,16 @@ void send_request(int sockfd,struct sockaddr_in server_addr, char *filename, int
 
     tftp_packet send_packet;
 
-    char buffer[256];
-    int pos = 0;
-
-    uint16_t op = htons(opcode);
-
-    memcpy(buffer+pos,&op,2);
-    pos+=2;
-
-    strcpy(buffer+pos,filename);
-    pos+=strlen(filename)+1;
-
-    strcpy(buffer+pos,"octet");
-    pos+=strlen("octet")+1;
-
     send_packet.opcode = htons(opcode);
+    // strcpy(send_packet.body.request.filename,filename);
+    memcpy(send_packet.body.request.filename,filename,strlen(filename)+1);
+    int send_packet_len = 2 + strlen(send_packet.body.request.filename)+1;
 
+    printf("[tftp_client]: sending filename %s\n",send_packet.body.request.filename);
 
     // TODO: mode is needed here
 
-
-    sendto(sockfd,buffer,pos,0,(struct sockaddr*)&server_addr,sizeof(server_addr));
+    sendto(sockfd,&send_packet,send_packet_len,0,(struct sockaddr*)&server_addr,sizeof(server_addr));
 
 
 }

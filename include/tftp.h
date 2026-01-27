@@ -31,6 +31,8 @@
  *       -> disk full
  */
 
+#pragma pack(1)
+
 typedef enum {
     RRQ = 1,  // Read Request
     WRQ = 2,  // Write Request
@@ -77,6 +79,7 @@ typedef struct {
         } error_packet; // ERROR
     } body;
 } tftp_packet;
+
 
 void send_file(int sockfd, struct sockaddr_in address, socklen_t client_len, char *filename);
 void receive_file(int sockfd, struct sockaddr_in address, socklen_t client_len, char *filename);

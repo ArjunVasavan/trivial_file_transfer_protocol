@@ -1,8 +1,11 @@
 #include "../../include/tftp.h"
+#include <arpa/inet.h>
+#include <stdio.h>
 
 void handle_client(int sockfd, struct sockaddr_in client_addr, socklen_t client_len, tftp_packet *packet);
 
 int main() {
+
     int sockfd;
     struct sockaddr_in server_addr, client_addr;
     socklen_t client_len = sizeof(client_addr);
@@ -17,7 +20,7 @@ int main() {
 
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(PORT);
-    server_addr.sin_addr.s_addr = INADDR_ANY;
+    server_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
 
     /* NOTE: INADDR_ANY
      * INADDR_ANY: it allows server to listen to any interface like local or LAN
@@ -44,7 +47,7 @@ int main() {
         int n = recvfrom(sockfd, &packet, BUFFER_SIZE, 0, (struct sockaddr *)&client_addr, &client_len);
 
         if (n < 0) {
-            perror("Receive failed or timeout occurred");
+            perror("Receive failed");
             continue;
         }
 
@@ -79,8 +82,11 @@ void handle_client(int sockfd, struct sockaddr_in client_addr, socklen_t client_
         ack_packet.body.ack_packet.block_number = htons(0);
 
         sendto(tid_sock,&ack_packet,4,0,(struct sockaddr*)&client_addr,client_len);
-        receive_file(tid_sock,client_addr,client_len,packet->body.request.filename);
 
+        printf("[handle_client]: recieved %s\n",packet->body.request.filename);
+        printf("[handle_client]: length of filename %lu\n",strlen(packet->body.request.filename));
+
+        receive_file(tid_sock,client_addr,client_len,packet->body.request.filename);
 
         close(tid_sock);
 
