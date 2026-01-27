@@ -31,7 +31,13 @@
  *       -> disk full
  */
 
+
 #pragma pack(1)
+
+/* NOTE: Main culprit of data getting lost
+ * without pragma pack data was sended with padding there because of that 
+ * hidden garbages was there when i tried to send data
+ */
 
 typedef enum {
     RRQ = 1,  // Read Request

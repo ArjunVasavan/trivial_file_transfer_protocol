@@ -9,7 +9,7 @@ int main() {
     tftp_client_t client;
     memset(&client, 0, sizeof(client)); 
 
-    while (1) { // an infinite loop till user presses exit
+    while (true) { // an infinite loop till user presses exit
 
     error_case: // this is an goto when user enters invalid options
 
@@ -25,50 +25,34 @@ int main() {
         switch (choice) {
 
             case 1:{
-
                 char ip_address[256];
                 int port_number;
 
                 if( read_client(ip_address,&port_number) == FAILURE ) {
-
                     fprintf(stderr,"[ERROR]: Enter valid details\n");
                     goto error_case;
-
                 }
 
                 connect_to_server(&client,ip_address,port_number);
-
                 connect_should_be_first = SUCCESS;
-
                 break;
             }
             case 2:{
-
                 if ( connect_should_be_first == FAILURE ) {
-
                     fprintf(stderr,"[ERROR]: Before doing operations first connect with server\n");
                     goto error_case;
-
                 }
-
                 char filename[256];
-
                 put_file(&client,filename);
-
                 break;
             }
             case 3:{
-
                 if ( connect_should_be_first == FAILURE ) {
-
                     fprintf(stderr,"[ERROR]: Before doing operations first connect with server\n");
                     goto error_case;
-
                 }
-
                 char filename[69];
                 get_file(&client,filename);
-
                 break;
             }
             case 4:{
@@ -95,7 +79,6 @@ int main() {
 void connect_to_server(tftp_client_t *client, char *ip, int port) {
 
     client->sockfd = socket(AF_INET,SOCK_DGRAM,0);
-
     client->server_len = sizeof(client->server_addr);
 
     if ( client->sockfd < 0 ) {
@@ -116,30 +99,17 @@ void put_file(tftp_client_t *client, char *filename) {
 
     printf("Enter the name of file to send: ");
     scanf("%s",filename);
-
     send_request(client->sockfd,client->server_addr,filename,WRQ);
-
-
     tftp_packet ack_packet;
-
-    struct sockaddr_in from;
-
-    socklen_t from_len = sizeof(from);
-
-    recvfrom(client->sockfd,&ack_packet,4,0,(struct sockaddr*)&from,&from_len);
+    recvfrom(client->sockfd,&ack_packet,4,0,NULL,NULL);
 
     if ( ntohs(ack_packet.opcode) != ACK || ntohs(ack_packet.body.ack_packet.block_number) != 0 ) {
-
         printf("WRQ rejected\n");
         return;
-
     }
 
     char location_of_file[69];
-
     sprintf(location_of_file,"src/client/%s",filename);
-
-    printf("going to send_file\n");
     send_file(client->sockfd,client->server_addr,client->server_len,location_of_file);
 
 }

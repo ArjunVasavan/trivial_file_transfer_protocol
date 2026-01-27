@@ -70,10 +70,7 @@ void handle_client(int sockfd, struct sockaddr_in client_addr, socklen_t client_
         ack_packet.body.ack_packet.block_number = htons(0);
 
         sendto(sockfd,&ack_packet,4,0,(struct sockaddr*)&client_addr,client_len);
-
         receive_file(sockfd,client_addr,client_len,packet->body.request.filename);
-
-
 
     }  else if (tftp_operation == RRQ) {
 

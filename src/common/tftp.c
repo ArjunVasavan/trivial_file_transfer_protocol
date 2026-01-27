@@ -1,12 +1,9 @@
 #include "../../include/tftp.h"
-#include <stdio.h>
 
 void send_file(int sockfd, struct sockaddr_in address, socklen_t len, char *filename) {
 
-    printf("inside sendfile\n");
     // Implement file sending logic here
     char buf[100];
-    getcwd(buf,sizeof(buf));
     int fd = open(filename,O_RDONLY);
 
     if ( fd < 0 ) {
@@ -15,28 +12,17 @@ void send_file(int sockfd, struct sockaddr_in address, socklen_t len, char *file
     }
 
     uint16_t block_number = 1;
-
     int read_count = 0;
-
     tftp_packet packet;
-
     packet.opcode = htons(DATA);
-
     int last_was_full = 0;
 
     while ( (read_count = read(fd,packet.body.data_packet.data,512)) > 0 ) {
 
-
-        printf("readed >%s<-\n",packet.body.data_packet.data);
-
         packet.body.data_packet.block_number = htons(block_number);
-
         packet.body.data_packet.data_size = read_count;
-
         unsigned long int packet_length = 2 + 2 + read_count;
-
         // PACKET LENGTH => 2 bytes(opcode) + 2 bytes (block_number) + read_count
-
 
     once_more_send:
 
@@ -57,23 +43,17 @@ void send_file(int sockfd, struct sockaddr_in address, socklen_t len, char *file
         */
 
         tftp_packet ack_packet;
-
         int ack_pack_length = 2 + 2 ;
         // ack_pack_length = 2 (opcode) + 2(block_number) 
 
         struct sockaddr_in from_addr;
         socklen_t from_len = sizeof(from_addr);
 
-
         recvfrom(sockfd,&ack_packet,ack_pack_length,0,(struct sockaddr*)&from_addr,&from_len);
-
         int ack_block_number = ntohs(ack_packet.body.ack_packet.block_number);
 
         if ( ntohs(ack_packet.opcode) !=  ACK ) {
-
             goto once_more_send;
-
-
         } else if ( ack_block_number != block_number ) {
 
             // FIXME: modify goto section logic
@@ -81,7 +61,6 @@ void send_file(int sockfd, struct sockaddr_in address, socklen_t len, char *file
             // recvfrom failure
         
             goto once_more_send;
-
         }
 
         if ( read_count == 512 ) {
@@ -163,24 +142,13 @@ void receive_file(int sockfd, struct sockaddr_in address, socklen_t len, char *f
 
 
     char fullpath[265];
-
     sprintf(fullpath,"src/server/%s",filename);
-
-
     int fd = open(fullpath,O_WRONLY|O_TRUNC|O_CREAT,0666); 
-
-    printf("created %s\n",filename);
-
     unsigned long int expected_block = 1;
-
     tftp_packet data_packet;
-
     long int recieved_bytes;
-
     struct sockaddr_in client_addr;
-
     socklen_t client_len = sizeof(client_addr);
-
     tftp_packet ack_packet;
 
     while ( true ) {
@@ -191,9 +159,7 @@ void receive_file(int sockfd, struct sockaddr_in address, socklen_t len, char *f
                                   0,(struct sockaddr*)&client_addr,&client_len);
 
         printf("[BYTES RECIEVED]: %lu\n",recieved_bytes);
-
         uint16_t opcode = ntohs(data_packet.opcode);
-
         uint16_t block_number = ntohs(data_packet.body.data_packet.block_number);
 
         if ( opcode == DATA ) {
@@ -217,21 +183,14 @@ void receive_file(int sockfd, struct sockaddr_in address, socklen_t len, char *f
             int data_length = recieved_bytes - 4 ; // 4 => opcode + block_number
 
             if ( data_length > 0 ) {
-
                 write(fd,data_packet.body.data_packet.data,data_length);
-
             }
 
             ack_packet.opcode = htons(ACK);
-
             ack_packet.body.ack_packet.block_number = htons(expected_block);
-
             sendto(sockfd,&ack_packet,4,0,(struct sockaddr*)&client_addr,client_len);
-
             expected_block+=1;
-
             if ( data_length < 512 ) break;
-
         }
 
     }
