@@ -1,7 +1,4 @@
 #include "../../include/tftp.h" // contain common defination  
-#include <netinet/in.h>
-#include <stdio.h>
-#include <sys/socket.h>
 #include "tftp_client.h" // client only defination and function declar
 
 status connect_should_be_first = FAILURE;
