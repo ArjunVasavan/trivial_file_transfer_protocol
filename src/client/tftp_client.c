@@ -1,4 +1,6 @@
 #include "../../include/tftp.h" // contain common defination  
+#include <netinet/in.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include "tftp_client.h" // client only defination and function declar
@@ -7,7 +9,7 @@ status connect_should_be_first = FAILURE;
 // This is used to check connection should happen first
 
 
-static tftp_mode current_mode = MODE_DEFAULT;
+static uint16_t current_mode = MODE_DEFAULT;
 
 int main() {
 
@@ -161,10 +163,12 @@ void send_request(int sockfd,struct sockaddr_in server_addr, char *filename, int
     memset(&send_packet,0,sizeof(send_packet));
     send_packet.opcode = htons(opcode);
     strcpy(send_packet.body.request.filename,filename);
-    strcpy(send_packet.body.request.mode,mode_to_string(current_mode));
-    printf("[send_request]: Sending %s mode\n",send_packet.body.request.mode);
-    int size_of_send_packet = 2 + strlen(filename) + 1 + strlen(send_packet.body.request.mode) + 1 ;
-    // size_of_send_packet = opcode (2 bytes) + filename + '\0' + mode + 1
+
+    size_t filename_len = strlen(filename) + 1;
+    uint16_t network_mode = htons(current_mode);
+    memcpy(send_packet.body.request.filename+filename_len,&network_mode,sizeof(uint16_t));
+
+    int size_of_send_packet = 2 + filename_len + sizeof(uint16_t) ;
     sendto(sockfd,&send_packet,size_of_send_packet,0,(struct sockaddr*)&server_addr,sizeof(server_addr));
 }
 
@@ -207,25 +211,4 @@ error_set_mode:
         }
     }
 
-    printf("Current Mode Set to : %s\n",mode_to_string(current_mode));
-
-}
-
-const char* mode_to_string (tftp_mode mode ) {
-    switch (mode) {
-
-        case MODE_DEFAULT: {
-
-            return "default";
-        }
-        case MODE_OCTET: {
-
-            return "octet";
-        }
-        case MODE_NETASCII: {
-
-            return "netascii";
-        }
-        default: return "unknown";
-    }
 }

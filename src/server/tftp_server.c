@@ -1,10 +1,12 @@
 #include "../../include/tftp.h"
+#include <bits/types/struct_iovec.h>
 #include <netinet/in.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/socket.h>
 
-static tftp_mode current_mode = MODE_DEFAULT;
+static uint16_t current_mode = MODE_DEFAULT;
 
 void handle_client(int sockfd, struct sockaddr_in client_addr, socklen_t client_len, tftp_packet *packet);
 
@@ -53,7 +55,8 @@ int main() {
             continue;
         }
 
-         handle_client(sockfd, client_addr, client_len, &packet);
+        printf("[main]: recived %d bytes from recvfrom\n",n);
+        handle_client(sockfd, client_addr, client_len, &packet);
     }
 
     close(sockfd);
@@ -65,28 +68,16 @@ void handle_client(int sockfd, struct sockaddr_in client_addr, socklen_t client_
     // and call send_file or receive_file accordingly
 
     tftp_opcode tftp_operation = ntohs(packet->opcode);
-    
     char* filename = packet->body.request.filename;
-    char* mode = filename+ strlen(filename) + 1;
 
-    if ( tftp_operation == WRQ || tftp_operation == RRQ ) {
+    size_t filename_len = strlen(filename) + 1;
+    uint16_t mode;
 
-        if ( strcmp(mode,"default") == 0 ) {
-            current_mode = MODE_DEFAULT;
-        } else if ( strcmp(mode,"octet") == 0 ) {
-            current_mode = MODE_OCTET;
-        } else if ( strcmp(mode,"netascii") == 0 ) {
-            current_mode = MODE_NETASCII;
-        } else {
+    memcpy(&mode,packet->body.request.filename+filename_len,sizeof(uint16_t));
+    mode = ntohs(mode);
 
-            printf("Transfer Mode: %s\n",mode);
-            fprintf(stderr,"[ERROR]: illegal mode recieved\n");
-            return;
-        }
-
-        printf("Transfer Mode: %s\n",mode);
-    }
-
+    printf("[handle_client]: filename is %s\n",filename);
+    printf("[handle_client]: mode is %d\n",mode);
 
     if ( tftp_operation == WRQ ) {
 
