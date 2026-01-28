@@ -1,8 +1,4 @@
 #include "../../include/tftp.h" // contain common defination  
-#include <netinet/in.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <string.h>
 #include "tftp_client.h" // client only defination and function declar
 
 status connect_should_be_first = FAILURE;
@@ -156,8 +152,8 @@ void disconnect(tftp_client_t *client) {
 
 }
 
-// NOTE: Facing mode corruption when sending request
-// i have written solution on my git hub comments
+// NOTE: Facing mode corruption when sending request 
+// i have written solution and approach on my git hub comments
 // link : https://github.com/ArjunVasavan/trivial_file_transfer_protocol/commit/b5783f441e1808450b8bce0231c617dead6bf03f#commitcomment-175840992
 
 void send_request(int sockfd,struct sockaddr_in server_addr, char *filename, int opcode) {
@@ -169,6 +165,7 @@ void send_request(int sockfd,struct sockaddr_in server_addr, char *filename, int
 
     size_t filename_len = strlen(filename) + 1;
     uint16_t network_mode = htons(current_mode);
+    printf("Sending network_mode: %d\n",network_mode);
     memcpy(send_packet.body.request.filename+filename_len,&network_mode,sizeof(uint16_t));
 
     int size_of_send_packet = 2 + filename_len + sizeof(uint16_t) ;
@@ -179,10 +176,10 @@ void set_mode() {
 
 error_set_mode:
     printf("Select Mode: \n");
-    printf("1) Default [512] ");
-    printf("2) Octet [1] ");
-    printf("3) NetASCII [\\n<->\\r\\n][1]");
-    printf("4) Exit");
+    printf("1) Default [512] \n");
+    printf("2) Octet [1] \n");
+    printf("3) NetASCII [\\n<->\\r\\n][1]\n");
+    printf("4) Exit\n");
     int choice;
     printf("Enter choice: ");
     scanf("%d",&choice);
