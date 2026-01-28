@@ -53,6 +53,13 @@ typedef enum {
 } status;
 
 
+typedef enum {
+    MODE_DEFAULT = 0,
+    MODE_OCTET = 1,
+    MODE_NETASCII = 2,
+} tftp_mode;
+
+
 /* NOTE: TFTP Packet Structure
  * opcode: first 2 bytes of every tftp packet, tells what kind of packet it is 
  * union: only one of these exist at a time 
@@ -61,6 +68,8 @@ typedef enum {
  *        ack_packet: ACK block_number must match the data block number
  *        error_packet: once ERROR is sent -> connection ends
  */
+
+
 
 typedef struct {
     uint16_t opcode; // Operation code (RRQ/WRQ/DATA/ACK/ERROR)
@@ -90,5 +99,7 @@ typedef struct {
 void send_file(int sockfd, struct sockaddr_in address, socklen_t client_len, char *filename);
 void receive_file(int sockfd, struct sockaddr_in address, socklen_t client_len, char *filename);
 status validate_filename(char* filename);
+void set_mode();
+const char* mode_to_string(tftp_mode mode);
 
 #endif // TFTP_H

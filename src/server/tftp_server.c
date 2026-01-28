@@ -1,8 +1,10 @@
 #include "../../include/tftp.h"
 #include <netinet/in.h>
 #include <stdio.h>
+#include <string.h>
 #include <sys/socket.h>
 
+static tftp_mode current_mode = MODE_DEFAULT;
 
 void handle_client(int sockfd, struct sockaddr_in client_addr, socklen_t client_len, tftp_packet *packet);
 
@@ -63,6 +65,28 @@ void handle_client(int sockfd, struct sockaddr_in client_addr, socklen_t client_
     // and call send_file or receive_file accordingly
 
     tftp_opcode tftp_operation = ntohs(packet->opcode);
+    
+    char* filename = packet->body.request.filename;
+    char* mode = filename+ strlen(filename) + 1;
+
+    if ( tftp_operation == WRQ || tftp_operation == RRQ ) {
+
+        if ( strcmp(mode,"default") == 0 ) {
+            current_mode = MODE_DEFAULT;
+        } else if ( strcmp(mode,"octet") == 0 ) {
+            current_mode = MODE_OCTET;
+        } else if ( strcmp(mode,"netascii") == 0 ) {
+            current_mode = MODE_NETASCII;
+        } else {
+
+            printf("Transfer Mode: %s\n",mode);
+            fprintf(stderr,"[ERROR]: illegal mode recieved\n");
+            return;
+        }
+
+        printf("Transfer Mode: %s\n",mode);
+    }
+
 
     if ( tftp_operation == WRQ ) {
 
