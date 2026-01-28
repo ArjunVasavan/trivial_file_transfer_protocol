@@ -156,6 +156,9 @@ void disconnect(tftp_client_t *client) {
 
 }
 
+// NOTE: Facing mode corruption when sending request
+// i have written solution on my git hub comments
+// link : https://github.com/ArjunVasavan/trivial_file_transfer_protocol/commit/b5783f441e1808450b8bce0231c617dead6bf03f#commitcomment-175840992
 
 void send_request(int sockfd,struct sockaddr_in server_addr, char *filename, int opcode) {
 
