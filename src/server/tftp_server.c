@@ -75,7 +75,7 @@ void handle_client(int sockfd, struct sockaddr_in client_addr, socklen_t client_
 
     memcpy(&mode,packet->body.request.filename+filename_len,sizeof(uint16_t));
     mode = ntohs(mode);
-
+    current_mode = mode;
     printf("[handle_client]: filename is %s\n",filename);
     printf("[handle_client]: mode is %d\n",mode);
 
@@ -96,8 +96,6 @@ void handle_client(int sockfd, struct sockaddr_in client_addr, socklen_t client_
         tftp_packet ack_packet;
         ack_packet.opcode = htons(ACK);
         ack_packet.body.ack_packet.block_number = htons(0);
-
-
 
         char fullpath[300];
         snprintf(fullpath,sizeof(fullpath),"src/server/%s",packet->body.request.filename);

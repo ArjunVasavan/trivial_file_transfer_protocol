@@ -102,5 +102,7 @@ void receive_file(int sockfd, struct sockaddr_in address, socklen_t client_len, 
 status validate_filename(char* filename);
 void set_mode();
 const char* mode_to_string(tftp_mode mode);
+int convert_to_netascii(char* input, int input_len, char* output, int max_output );
+int convert_from_netascii(char* input, int input_len, char* output, int max_output);
 
 #endif // TFTP_H
