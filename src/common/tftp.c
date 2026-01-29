@@ -283,7 +283,7 @@ int convert_from_netascii(char* input, int input_len, char* output, int max_outp
     int output_idx = 0;
 
     for ( int i = 0 ; i < input_len && output_idx < max_output - 1 ; i++ ) {
-        if ( i < input_len - 1 &&  input[i] == 'r' && input[i+1] == '\n' ) {
+        if ( i < input_len - 1 &&  input[i] == '\r' && input[i+1] == '\n' ) {
             //convert \r\n to \n 
             output[output_idx++] = '\n';
             i+=1; // skipping the next \n [\r\n -> \n]
