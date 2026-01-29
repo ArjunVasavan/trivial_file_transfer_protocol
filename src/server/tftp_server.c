@@ -88,7 +88,7 @@ void handle_client(int sockfd, struct sockaddr_in client_addr, socklen_t client_
         sendto(sockfd,&ack_packet,4,0,(struct sockaddr*)&client_addr,client_len);
         char fullpath[300];
         snprintf(fullpath,sizeof(fullpath),"src/server/%s",packet->body.request.filename);
-        receive_file(sockfd,client_addr,client_len,fullpath);
+        receive_file(sockfd,client_addr,client_len,fullpath, current_mode);
 
 
     }  else if (tftp_operation == RRQ) {
@@ -102,7 +102,7 @@ void handle_client(int sockfd, struct sockaddr_in client_addr, socklen_t client_
         char fullpath[300];
         snprintf(fullpath,sizeof(fullpath),"src/server/%s",packet->body.request.filename);
         sendto(sockfd,&ack_packet,4,0,(struct sockaddr*)&client_addr,client_len);
-        send_file(sockfd,client_addr,client_len,fullpath);
+        send_file(sockfd,client_addr,client_len,fullpath, current_mode);
 
 
     } else {

@@ -1,7 +1,7 @@
 #include "../../include/tftp.h"
 #include <stdio.h>
 
-void send_file(int sockfd, struct sockaddr_in address, socklen_t len, char *filename) {
+void send_file(int sockfd, struct sockaddr_in address, socklen_t len, char *filename, tftp_mode mode) {
 
     // Implement file sending logic here
     char buf[100];
@@ -142,7 +142,7 @@ void send_file(int sockfd, struct sockaddr_in address, socklen_t len, char *file
     close(fd);
 }
 
-void receive_file(int sockfd, struct sockaddr_in address, socklen_t len, char *filename) {
+void receive_file(int sockfd, struct sockaddr_in address, socklen_t len, char *filename, tftp_mode mode) {
 
     printf("[receive_file]: opening %s\n",filename);
     int fd = open(filename,O_WRONLY|O_TRUNC|O_CREAT,0666); 

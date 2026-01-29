@@ -97,8 +97,8 @@ typedef struct {
 
 #pragma pack()
 
-void send_file(int sockfd, struct sockaddr_in address, socklen_t client_len, char *filename);
-void receive_file(int sockfd, struct sockaddr_in address, socklen_t client_len, char *filename);
+void send_file(int sockfd, struct sockaddr_in address, socklen_t client_len, char *filename, tftp_mode mode);
+void receive_file(int sockfd, struct sockaddr_in address, socklen_t client_len, char *filename, tftp_mode mode);
 status validate_filename(char* filename);
 void set_mode();
 const char* mode_to_string(tftp_mode mode);

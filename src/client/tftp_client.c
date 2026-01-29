@@ -120,7 +120,7 @@ void put_file(tftp_client_t *client, char *filename) {
 
     char location_of_file[69];
     sprintf(location_of_file,"src/client/%s",filename);
-    send_file(client->sockfd,client->server_addr,client->server_len,location_of_file);
+    send_file(client->sockfd,client->server_addr,client->server_len,location_of_file, current_mode);
 
 }
 
@@ -143,7 +143,7 @@ void get_file(tftp_client_t *client, char *filename) {
 
     char fullpath[300];
     snprintf(fullpath,sizeof(fullpath),"src/client/%s",filename);
-    receive_file(client->sockfd,client->server_addr,client->server_len,fullpath);
+    receive_file(client->sockfd,client->server_addr,client->server_len,fullpath, current_mode);
     
 }
 
