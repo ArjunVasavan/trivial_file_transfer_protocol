@@ -1,5 +1,8 @@
 #include "../../include/tftp.h"    
 #include "../client/tftp_client.h"
+#include <fcntl.h>
+#include <stdio.h>
+#include <unistd.h>
 
 status validate_ip(char* ip_address) {
 
@@ -65,10 +68,35 @@ status read_client(char* ip_address,int* port_number) {
     return SUCCESS;
 }
 
-status validate_filename(char* filename) {
+
+/* NOTE: access() function
+   This is an function which checks the permission of path
+   F_OK -> does file exist?
+   R_OK -> read permission
+   W_OK -> write permission
+   X_OK -> execute permission
+*/
+
+status validate_filename(char* filename, uint16_t operation) {
 
     
-    
+    printf("[validate_filename]: files name is %s\n",filename);
+
+    if ( operation == W_OK ) {
+
+        if ( access(filename,W_OK) == -1 ) {
+            perror("File is Not writable");
+            return FAILURE;
+        }
+
+    } else if ( operation == R_OK ) {
+
+        if ( access(filename,R_OK) == -1 ) {
+            perror("File is not readable");
+            return FAILURE;
+        }
+
+    }
 
     return SUCCESS;
 }

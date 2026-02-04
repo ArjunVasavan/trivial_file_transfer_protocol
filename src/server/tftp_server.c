@@ -79,6 +79,8 @@ void handle_client(int sockfd, struct sockaddr_in client_addr, socklen_t client_
     printf("[handle_client]: filename is %s\n",filename);
     printf("[handle_client]: mode is %d\n",mode);
 
+    
+
     if ( tftp_operation == WRQ ) {
 
         tftp_packet ack_packet;

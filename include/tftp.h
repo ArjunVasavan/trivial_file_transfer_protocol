@@ -99,7 +99,7 @@ typedef struct {
 
 void send_file(int sockfd, struct sockaddr_in address, socklen_t client_len, char *filename, tftp_mode mode);
 void receive_file(int sockfd, struct sockaddr_in address, socklen_t client_len, char *filename, tftp_mode mode);
-status validate_filename(char* filename);
+status validate_filename(char* filename, uint16_t operation);
 void set_mode();
 const char* mode_to_string(tftp_mode mode);
 int convert_to_netascii(char* input, int input_len, char* output, int max_output );

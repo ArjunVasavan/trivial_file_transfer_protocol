@@ -6,7 +6,6 @@
 void send_file(int sockfd, struct sockaddr_in address, socklen_t len, char *filename, tftp_mode mode) {
 
     // Implement file sending logic here
-    char buf[100];
     printf("[send_file]:opening %s\n",filename);
     int fd = open(filename,O_RDONLY);
     printf("[send_file]:opening successfull\n");
@@ -94,10 +93,6 @@ void send_file(int sockfd, struct sockaddr_in address, socklen_t len, char *file
         if ( ntohs(ack_packet.opcode) !=  ACK ) {
             goto once_more_send;
         } else if ( ack_block_number != block_number ) {
-
-            // FIXME: modify goto section logic
-            // fix: wrong op code
-            // recvfrom failure
 
             goto once_more_send;
         }
@@ -188,12 +183,6 @@ void receive_file(int sockfd, struct sockaddr_in address, socklen_t len, char *f
     tftp_packet ack_packet;
 
     int expected_chunk_size = (mode == MODE_OCTET) ? 1 : 512; // NetAscii and Default are 512
-    
-    if ( mode == MODE_OCTET ) {
-        expected_chunk_size = 1;
-    } else {
-        expected_chunk_size = 512;
-    }
 
     char converted_buffer[1024];
 
@@ -221,8 +210,6 @@ void receive_file(int sockfd, struct sockaddr_in address, socklen_t len, char *f
                 sendto(sockfd,&ack_packet,4,0,(struct sockaddr*)&client_addr,client_len);
 
                 goto once_more_read;
-
-                // FIXME: modify goto later 
 
             }
 

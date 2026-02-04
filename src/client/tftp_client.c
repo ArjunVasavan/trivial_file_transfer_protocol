@@ -55,7 +55,7 @@ int main() {
                     fprintf(stderr,"[ERROR]: Before doing operations first connect with server\n");
                     goto error_case;
                 }
-                char filename[69];
+                char filename[256];
                 get_file(&client,filename);
                 break;
             }
@@ -71,6 +71,9 @@ int main() {
             }
             case 5:{
 
+                printf("Exiting...\n");
+                close(client.sockfd);
+                exit(EXIT_SUCCESS);
                 break;
             }
             default:{
@@ -109,6 +112,14 @@ void put_file(tftp_client_t *client, char *filename) {
 
     printf("Enter the name of file to send: ");
     scanf("%s",filename);
+    char location_of_file[256];
+    sprintf(location_of_file,"src/client/%s",filename);
+
+    if ( validate_filename(location_of_file,R_OK) == FAILURE ) {
+        printf("[ERROR]: cannot read file from %s\n",location_of_file);
+        return;
+    }
+
     send_request(client->sockfd,client->server_addr,filename,WRQ);
     tftp_packet ack_packet;
     recvfrom(client->sockfd,&ack_packet,4,0,NULL,NULL);
@@ -117,9 +128,6 @@ void put_file(tftp_client_t *client, char *filename) {
         printf("WRQ rejected\n");
         return;
     }
-
-    char location_of_file[69];
-    sprintf(location_of_file,"src/client/%s",filename);
     send_file(client->sockfd,client->server_addr,client->server_len,location_of_file, current_mode);
 
 }
@@ -129,6 +137,12 @@ void get_file(tftp_client_t *client, char *filename) {
 
     printf("Enter the name of file to recieve: ");
     scanf("%s",filename);
+    char fullpath[300];
+    snprintf(fullpath,sizeof(fullpath),"src/client/%s",filename);
+    if ( validate_filename(fullpath,W_OK) == FAILURE ) {
+        printf("[ERROR]: cannot write to %s\n",fullpath);
+        return;
+    }
     printf("[get_file]: sending request\n");
     send_request(client->sockfd,client->server_addr,filename,RRQ);
     tftp_packet ack_packet;
@@ -141,8 +155,6 @@ void get_file(tftp_client_t *client, char *filename) {
         return;
     }
 
-    char fullpath[300];
-    snprintf(fullpath,sizeof(fullpath),"src/client/%s",filename);
     receive_file(client->sockfd,client->server_addr,client->server_len,fullpath, current_mode);
     
 }
