@@ -8,7 +8,6 @@ typedef struct {
     struct sockaddr_in server_addr;
     socklen_t server_len; 
     char server_ip[INET_ADDRSTRLEN]; // NOTE: we store ip address in this
-    // TODO: declare one more for portnumber as server_port
 } tftp_client_t;
 
 // Function prototypes
