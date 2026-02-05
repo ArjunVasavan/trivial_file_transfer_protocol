@@ -1,5 +1,5 @@
 all:
-	gcc -Iinclude src/client/tftp_client.c src/common/tftp.c src/common/validation.c -o a.out
+	gcc -Iinclude src/client/tftp_client.c src/common/tftp.c src/common/validation.c -o tftp_client
 	gcc -Iinclude src/server/tftp_server.c src/common/tftp.c src/common/validation.c -o tftp_server
 
 clean:

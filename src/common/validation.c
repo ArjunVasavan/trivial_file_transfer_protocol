@@ -1,8 +1,5 @@
 #include "../../include/tftp.h"    
 #include "../client/tftp_client.h"
-#include <fcntl.h>
-#include <stdio.h>
-#include <unistd.h>
 
 status validate_ip(char* ip_address) {
 
