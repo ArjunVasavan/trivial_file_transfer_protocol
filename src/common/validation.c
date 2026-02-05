@@ -8,6 +8,8 @@ status validate_ip(char* ip_address) {
 
     struct in_addr dummy;
 
+
+
     /* NOTE: inet_pton for IP address validation
      * Internet Presentation TO Network
      * converts human readable string to binary format (used by sockets)
@@ -15,7 +17,7 @@ status validate_ip(char* ip_address) {
      * it will also reject invalid number
      * it will return '1' if its valid else any other number will come
      * ~>The reason i used dummy is that if i put NULL on that function it will
-     *   lead to segmentaion fault
+     *   lead to segmentaion fault.
      */
 
     if ( inet_pton(AF_INET,ip_address,&dummy) != 1 ) {
@@ -24,9 +26,7 @@ status validate_ip(char* ip_address) {
         return FAILURE;
 
     } else {
-
         return SUCCESS;
-
     }
 
 }
@@ -78,25 +78,16 @@ status read_client(char* ip_address,int* port_number) {
 */
 
 status validate_filename(char* filename, uint16_t operation) {
-
-    
-    printf("[validate_filename]: files name is %s\n",filename);
-
     if ( operation == W_OK ) {
-
         if ( access(filename,W_OK) == -1 ) {
             perror("File is Not writable");
             return FAILURE;
         }
-
     } else if ( operation == R_OK ) {
-
         if ( access(filename,R_OK) == -1 ) {
             perror("File is not readable");
             return FAILURE;
         }
-
     }
-
     return SUCCESS;
 }

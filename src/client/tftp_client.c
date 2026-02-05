@@ -4,7 +4,6 @@
 status connect_should_be_first = FAILURE;
 // This is used to check connection should happen first
 
-
 static uint16_t current_mode = MODE_DEFAULT;
 
 int main() {
@@ -13,17 +12,16 @@ int main() {
     memset(&client, 0, sizeof(client)); 
 
     while (true) { // an infinite loop till user presses exit
-
     error_case: // this is an goto when user enters invalid options
 
-        printf("Client Menu\n");
+        printf("---Client Menu---\n");
         printf("1) Connect\n");
         printf("2) Put\n");
         printf("3) Get\n");
         printf("4) Mode\n");
         printf("5) Exit\n");
         int choice;
-        printf("Enter an Choice: ");
+        printf("Enter your choice: ");
         scanf("%d",&choice);
 
         switch (choice) {
@@ -46,6 +44,7 @@ int main() {
                     fprintf(stderr,"[ERROR]: Before doing operations first connect with server\n");
                     goto error_case;
                 }
+
                 char filename[256];
                 put_file(&client,filename);
                 break;
@@ -55,6 +54,7 @@ int main() {
                     fprintf(stderr,"[ERROR]: Before doing operations first connect with server\n");
                     goto error_case;
                 }
+
                 char filename[256];
                 get_file(&client,filename);
                 break;
@@ -66,11 +66,9 @@ int main() {
                 }
 
                 set_mode();
-
                 break;
             }
             case 5:{
-
                 printf("Exiting...\n");
                 close(client.sockfd);
                 exit(EXIT_SUCCESS);
@@ -82,9 +80,7 @@ int main() {
                 goto error_case;
             }
         }
-
     }
-
     return 0;
 }
 
@@ -108,10 +104,9 @@ void connect_to_server(tftp_client_t *client, char *ip, int port) {
 
 void put_file(tftp_client_t *client, char *filename) {
 
-    // Send WRQ request and send file
-
     printf("Enter the name of file to send: ");
-    scanf("%s",filename);
+    scanf("%255s",filename);
+
     char location_of_file[256];
     sprintf(location_of_file,"src/client/%s",filename);
 
@@ -129,26 +124,23 @@ void put_file(tftp_client_t *client, char *filename) {
         return;
     }
     send_file(client->sockfd,client->server_addr,client->server_len,location_of_file, current_mode);
-
 }
 
 void get_file(tftp_client_t *client, char *filename) {
-    // Send RRQ and recive file 
 
     printf("Enter the name of file to recieve: ");
     scanf("%s",filename);
     char fullpath[300];
     snprintf(fullpath,sizeof(fullpath),"src/client/%s",filename);
+
     if ( validate_filename(fullpath,W_OK) == FAILURE ) {
         printf("[ERROR]: cannot write to %s\n",fullpath);
         return;
     }
-    printf("[get_file]: sending request\n");
+
     send_request(client->sockfd,client->server_addr,filename,RRQ);
     tftp_packet ack_packet;
     recvfrom(client->sockfd,&ack_packet,4,0,NULL,NULL);
-    printf("[get_file]: recieved ACK\n");
-
 
     if ( ntohs(ack_packet.opcode) != ACK || ntohs(ack_packet.body.ack_packet.block_number) != 0 ) {
         printf("RRQ rejected\n");
@@ -156,7 +148,6 @@ void get_file(tftp_client_t *client, char *filename) {
     }
 
     receive_file(client->sockfd,client->server_addr,client->server_len,fullpath, current_mode);
-    
 }
 
 void disconnect(tftp_client_t *client) {
@@ -199,17 +190,14 @@ error_set_mode:
     switch (choice) {
     
         case 1: {
-
             current_mode = MODE_DEFAULT;
             break;
         }
         case 2: {
-
             current_mode = MODE_OCTET;
             break;
         }
         case 3: {
-
             current_mode = MODE_NETASCII;
             break;
         }

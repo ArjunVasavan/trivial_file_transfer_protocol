@@ -14,7 +14,6 @@
 #include <fcntl.h>
 #include <errno.h>
 
-
 #define PORT 6969
 #define BUFFER_SIZE 516  // Maximum possible packet size
 //[opcode(2)][block_number(2)][Data(0-512)]
@@ -30,7 +29,6 @@
  *       -> illegal opcode
  *       -> disk full
  */
-
 
 #pragma pack (1)
 
@@ -73,7 +71,6 @@ typedef enum {
 
 typedef struct {
     uint16_t opcode; // Operation code (RRQ/WRQ/DATA/ACK/ERROR)
-    
     union {
         struct {
             char filename[256];

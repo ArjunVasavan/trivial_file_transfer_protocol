@@ -5,10 +5,7 @@
 
 void send_file(int sockfd, struct sockaddr_in address, socklen_t len, char *filename, tftp_mode mode) {
 
-    // Implement file sending logic here
-    printf("[send_file]:opening %s\n",filename);
     int fd = open(filename,O_RDONLY);
-    printf("[send_file]:opening successfull\n");
 
     if ( fd < 0 ) {
         perror("open failed");
@@ -36,7 +33,6 @@ void send_file(int sockfd, struct sockaddr_in address, socklen_t len, char *file
 
     while ( true ) { 
 
-
         if ( mode == MODE_NETASCII ) { // for netascii im using  an tmp buffer
             read_count = read(fd,read_buffer,chunk_size);
         } else {
@@ -47,23 +43,16 @@ void send_file(int sockfd, struct sockaddr_in address, socklen_t len, char *file
 
         if ( mode == MODE_NETASCII ) {
             int converted_len = convert_to_netascii(read_buffer,read_count,converted_buffer,1024);
-
             memcpy(packet.body.data_packet.data,converted_buffer,converted_len);
             read_count = converted_len;
-            printf("[send_file]: NETASCII Converted %d bytes\n",converted_len);
         }
 
-
-        printf("[send_file]: read ""%s""  \n",packet.body.data_packet.data);
         packet.body.data_packet.block_number = htons(block_number);
         packet.body.data_packet.data_size = read_count;
         unsigned long int packet_length = 2 + 2 + read_count;
         // PACKET LENGTH => 2 bytes(opcode) + 2 bytes (block_number) + read_count
 
     once_more_send:
-
-        printf("[send_file]: sending packet block %d  , size %d bytes (mode=%d)\n",
-               block_number,read_count,mode);
         sendto(sockfd,&packet,packet_length,0,(struct sockaddr*)&address,len);
 
         /*
@@ -93,32 +82,21 @@ void send_file(int sockfd, struct sockaddr_in address, socklen_t len, char *file
         if ( ntohs(ack_packet.opcode) !=  ACK ) {
             goto once_more_send;
         } else if ( ack_block_number != block_number ) {
-
             goto once_more_send;
         }
 
         if ( read_count == chunk_size ) {
-
             last_was_full  = 1;
-
         } else {
-
             last_was_full = 0;
-
         }
 
         block_number+=1;
 
         if ( read_count < chunk_size ) {
-
             break;
         }
-
-        printf("[send_file]: Comeplete data sended\n");
-
     }
-
-    printf("[send_file]: exited\n");
 
     // NOTE: EDGE CASE => if last data size is mutliple of 512
     // the sender must send one extra data packet with 0 bytes
@@ -131,11 +109,8 @@ void send_file(int sockfd, struct sockaddr_in address, socklen_t len, char *file
         unsigned long packet_length = 2 + 2;
 
     edge_case:
-
         sendto(sockfd, &packet, packet_length, 0,
                (struct sockaddr*)&address, len);
-
-        // wait for ACK of this block
 
         tftp_packet ack_packet;
 
@@ -144,46 +119,36 @@ void send_file(int sockfd, struct sockaddr_in address, socklen_t len, char *file
 
         struct sockaddr_in from_addr;
         socklen_t from_len = sizeof(from_addr);
-
-
         recvfrom(sockfd,&ack_packet,ack_pack_length,0,(struct sockaddr*)&from_addr,&from_len);
-
         int ack_block_number = ntohs(ack_packet.body.ack_packet.block_number);
 
         if ( ntohs(ack_packet.opcode) !=  ACK ) {
-
             goto edge_case;
-
-
         } else if ( ack_block_number != block_number ) {
-
             goto edge_case;
-
         }
-
-        printf("Completed last_was_full case\n");
-
     }
 
     printf("Completed Sending (mode %d)\n",mode);
-
     close(fd);
 }
 
 void receive_file(int sockfd, struct sockaddr_in address, socklen_t len, char *filename, tftp_mode mode) {
 
-    printf("[receive_file]: opening %s\n",filename);
     int fd = open(filename,O_WRONLY|O_TRUNC|O_CREAT,0666); 
-    printf("[receive_file]: opening successfull\n");
+
+    if ( fd < 0 ) {
+        perror("failed opening");
+        return;
+    }
+
     unsigned long int expected_block = 1;
     tftp_packet data_packet;
     long int recieved_bytes;
     struct sockaddr_in client_addr;
     socklen_t client_len = sizeof(client_addr);
     tftp_packet ack_packet;
-
     int expected_chunk_size = (mode == MODE_OCTET) ? 1 : 512; // NetAscii and Default are 512
-
     char converted_buffer[1024];
 
     while ( true ) {
@@ -220,7 +185,6 @@ void receive_file(int sockfd, struct sockaddr_in address, socklen_t len, char *f
                     int converted_len = convert_from_netascii(data_packet.body.data_packet.data,data_length,converted_buffer,1024);
 
                     write(fd,converted_buffer,converted_len);
-                    printf("[receive_file]: NetASCII wrote %d bytes\n",converted_len);
                 } else {
                     write(fd,data_packet.body.data_packet.data,data_length);
                 }
@@ -255,7 +219,6 @@ int convert_to_netascii(char* input, int input_len, char* output, int max_output
                 output[output_idx++] = '\r';
                 output[output_idx++] = '\n';
             }
-
         } else {
             output[output_idx++] = input[i];
         }
