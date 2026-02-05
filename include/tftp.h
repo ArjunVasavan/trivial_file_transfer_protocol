@@ -45,6 +45,8 @@ typedef enum {
     ERROR = 5 // Error Packet
 } tftp_opcode;
 
+#define DISCONNECT 6  
+
 typedef enum {
     SUCCESS = 0,
     FAILURE = 1

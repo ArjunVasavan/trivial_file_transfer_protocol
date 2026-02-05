@@ -69,8 +69,12 @@ int main() {
                 break;
             }
             case 5:{
+                if (connect_should_be_first == SUCCESS) {
+                    disconnect(&client);  // Add this line
+                } else {
+                    close(client.sockfd);  // Close even if not connected
+                }
                 printf("Exiting...\n");
-                close(client.sockfd);
                 exit(EXIT_SUCCESS);
                 break;
             }
@@ -151,8 +155,15 @@ void get_file(tftp_client_t *client, char *filename) {
 }
 
 void disconnect(tftp_client_t *client) {
-    // close fd
-
+    tftp_packet disconnect_packet;
+    disconnect_packet.opcode = htons(DISCONNECT);
+    
+    sendto(client->sockfd, &disconnect_packet, 2, 0, 
+           (struct sockaddr*)&client->server_addr, 
+           sizeof(client->server_addr));
+    
+    printf("Disconnect packet sent to server\n");
+    close(client->sockfd);
 }
 
 // NOTE: Facing mode corruption when sending request 
