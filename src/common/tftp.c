@@ -158,7 +158,6 @@ void receive_file(int sockfd, struct sockaddr_in address, socklen_t len, char *f
         recieved_bytes = recvfrom(sockfd,&data_packet,BUFFER_SIZE,
                                   0,(struct sockaddr*)&client_addr,&client_len);
 
-        printf("[BYTES RECIEVED]: %lu\n",recieved_bytes);
         uint16_t opcode = ntohs(data_packet.opcode);
         uint16_t block_number = ntohs(data_packet.body.data_packet.block_number);
 

@@ -44,8 +44,6 @@ int main() {
             perror("Receive failed");
             continue;
         }
-
-        printf("[main]: recived %d bytes from recvfrom\n",n);
         handle_client(sockfd, client_addr, client_len, &packet);
     }
 
