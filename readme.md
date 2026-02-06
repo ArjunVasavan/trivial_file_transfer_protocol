@@ -6,12 +6,6 @@
 ## Description
 A **complete implementation of the Trivial File Transfer Protocol (TFTP)** using **C** with support for multiple transfer modes.
 
-## Features
-- ✅ File upload (PUT) and download (GET)
-- ✅ Three transfer modes: Default (512 bytes), Octet (1 byte), NetASCII
-- ✅ Clean client connection and disconnection
-- ✅ Sequential multi-client support
-
 ## Installation
 Clone the repository:
 ```bash
@@ -47,11 +41,6 @@ Run client:
 ### File Locations
 - **PUT (Upload)**: Files read from `src/client/` → saved to `src/server/`
 - **GET (Download)**: Files read from `src/server/` → saved to `src/client/`
-
-## Requirements
-* GCC compiler
-* Linux/Unix system
-* Make utility
 
 ## Author
 Arjun Vasavan
